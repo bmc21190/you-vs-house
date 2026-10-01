@@ -7,21 +7,506 @@
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#eef1f7,#10131b);--surface:light-dark(#fff,#1a1e28);--surface2:light-dark(#f5f7fb,#121620);--text:light-dark(#151923,#f5f7ff);--muted:light-dark(#626a7c,#aab1c2);--border:light-dark(#dce1eb,#303746);--accent:light-dark(#151923,#fff);--accentText:light-dark(#fff,#11131a)}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
-#app{min-height:100vh;background:var(--bg);padding:32px 20px 40px;display:grid;place-items:center}@keyframes wheelSpin{from{transform:rotate(0deg)}to{transform:rotate(1800deg)}}#wheel.spinning{animation:wheelSpin 2.5s cubic-bezier(.12,.8,.18,1) forwards}.wheel-button{position:relative;z-index:5;pointer-events:auto}.wheel-section{display:block!important;visibility:visible!important;opacity:1!important}
-.game{width:min(720px,100%);text-align:center}.eyebrow{font-size:12px;font-weight:800;letter-spacing:3px;color:var(--muted);margin-bottom:8px}h1{font-size:clamp(38px,7vw,62px);line-height:1;margin:0;letter-spacing:-2px}header p{color:var(--muted);margin:12px 0 28px}.dice-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{padding:20px;border:1px solid var(--border);border-radius:22px;background:var(--surface)}.card h2{margin:0 0 14px}.die{height:170px;display:grid;place-items:center;background:var(--surface2);font-size:0;font-weight:900;position:relative}.die::before{content:"";width:112px;height:98px;background:var(--accent);clip-path:polygon(50% 0,100% 100%,0 100%);border-radius:6px;box-shadow:0 7px 14px #0003}.die::after{content:attr(data-value);position:absolute;color:var(--accentText);font-size:48px;font-weight:900;transform:translateY(14px)}.die.rolling::before{animation:tetraRoll .65s ease-in-out infinite}.die.rolling::after{animation:numberFlash .65s ease-in-out infinite;content:""}.die.rolling{opacity:.9}@keyframes tetraRoll{0%,100%{transform:rotate(0deg) scale(1)}25%{transform:rotate(90deg) scale(.86)}50%{transform:rotate(180deg) scale(1)}75%{transform:rotate(270deg) scale(.86)}}@keyframes numberFlash{0%,100%{opacity:1}50%{opacity:.2}}.roll{margin:22px 0 12px;padding:15px 34px;border:0;border-radius:14px;background:var(--accent);color:var(--accentText);font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 5px 16px #0002}.roll:active{transform:scale(.97)}.result{min-height:34px;margin:12px 0 22px;font-size:24px;font-weight:800}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{padding:14px;border:1px solid var(--border);border-radius:15px;background:var(--surface)}.stat span{display:block;color:var(--muted);font-size:13px}.stat strong{font-size:24px}.wheel-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.wheel-stat{padding:12px;border:1px solid var(--border);border-radius:15px;background:var(--surface2)}.wheel-stat span{display:block;color:var(--muted);font-size:13px}.wheel-stat strong{font-size:22px}.note{color:var(--muted);font-size:13px;line-height:1.5;margin-top:18px}@media(max-width:500px){.dice-grid{gap:10px}.die{height:130px}.stats{gap:7px}.stat{padding:11px}.wheel-stats{gap:7px}.wheel-stat{padding:10px}}
+#app{min-height:100vh;background:radial-gradient(circle at top,light-dark(#fff,#202532) 0%,var(--bg) 48%);padding:42px 20px 56px;display:grid;place-items:center}
+@keyframes wheelSpin{from{transform:rotate(0deg)}to{transform:rotate(1800deg)}}
+#wheel.spinning{animation:wheelSpin 2.5s cubic-bezier(.12,.8,.18,1) forwards}
+.wheel-button{position:relative;z-index:5;pointer-events:auto}
+.wheel-wrap{position:relative;width:min(260px,70vw);margin:22px auto}
+.wheel-pointer{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:22px solid var(--accent);position:absolute;top:-10px;left:50%;transform:translateX(-50%);z-index:20;filter:drop-shadow(0 2px 2px #0004)}
+.tabs{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:0 auto 28px;padding:6px;border:1px solid var(--border);border-radius:18px;background:var(--surface);position:sticky;top:12px;z-index:50;box-shadow:0 8px 24px #00000012}
+.tab{border:0;border-radius:12px;padding:10px 18px;background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:800;cursor:pointer;transition:.15s}
+.tab:hover,.tab.active{background:var(--accent);color:var(--accentText)}
+.game-section{scroll-margin-top:80px}
+.game{width:min(720px,100%);text-align:center}
+.eyebrow{font-size:11px;font-weight:850;letter-spacing:3.5px;color:var(--muted);margin-bottom:10px}
+h1{font-size:clamp(40px,7vw,62px);line-height:1;margin:0;letter-spacing:-2.5px}
+header p{color:var(--muted);margin:14px 0 32px;font-size:15px}
+.dice-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{padding:22px;border:1px solid var(--border);border-radius:24px;background:color-mix(in srgb,var(--surface) 94%,transparent);box-shadow:0 10px 30px #0000000d}
+.card h2{margin:0 0 16px;font-size:20px}
+.die{height:170px;display:grid;place-items:center;background:var(--surface2);font-size:0;font-weight:900;position:relative;border-radius:16px;overflow:hidden}
+.die::before{content:"";width:112px;height:98px;background:var(--accent);clip-path:polygon(50% 0,100% 100%,0 100%);border-radius:6px;box-shadow:0 7px 14px #0003}
+.die::after{content:attr(data-value);position:absolute;color:var(--accentText);font-size:48px;font-weight:900;transform:translateY(14px)}
+.die.rolling::before{animation:tetraRoll .65s ease-in-out infinite}
+.die.rolling::after{animation:numberFlash .65s ease-in-out infinite;content:""}
+.die.rolling{opacity:.9}
+@keyframes tetraRoll{0%,100%{transform:rotate(0deg) scale(1)}25%{transform:rotate(90deg) scale(.86)}50%{transform:rotate(180deg) scale(1)}75%{transform:rotate(270deg) scale(.86)}}
+@keyframes numberFlash{0%,100%{opacity:1}50%{opacity:.2}}
+.roll{margin:24px 0 14px;padding:14px 30px;border:0;border-radius:13px;background:var(--accent);color:var(--accentText);font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 6px 18px #00000018;transition:transform .15s ease,opacity .15s ease,box-shadow .15s ease}
+.roll:hover{transform:translateY(-1px);box-shadow:0 8px 22px #00000022}
+.roll:active{transform:scale(.97)}
+.roll:disabled{opacity:.55;cursor:wait}
+.result{min-height:34px;margin:10px 0 24px;font-size:22px;font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat{padding:15px;border:1px solid var(--border);border-radius:16px;background:var(--surface)}
+.stat span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}
+.stat strong{font-size:24px}
+.wheel-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.wheel-stat{padding:13px;border:1px solid var(--border);border-radius:16px;background:var(--surface2)}
+.wheel-stat span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px}
+.wheel-stat strong{font-size:22px}
+.stopwatch-display{font-size:48px;font-weight:900;letter-spacing:2px;margin:16px 0 20px;font-variant-numeric:tabular-nums}
+.stopwatch-buttons{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.stopwatch-button{margin:0;padding:12px 22px}
+.note{color:var(--muted);font-size:13px;line-height:1.5;margin-top:18px}
+@media(max-width:500px){
+#app{padding:30px 14px 44px}
+.dice-grid{gap:10px}
+.card{padding:16px;border-radius:20px}
+.die{height:130px}
+.stats{gap:7px}
+.stat{padding:11px}
+.wheel-stats{gap:7px}
+.wheel-stat{padding:10px}
+.result{font-size:19px}
+}
 </style>
 </head>
-<body><div id="app"><main class="game">
-<div class="eyebrow">🎲 DICE GAME</div><h1>You vs. House</h1><header><p>Roll two 4-sided dice. Higher number wins. No ties.</p></header>
-<section class="dice-grid"><article class="card"><h2>You</h2><div id="youDie" class="die" data-value="?"></div></article><article class="card"><h2>House 🏠</h2><div id="houseDie" class="die" data-value="?"></div></article></section>
-<button id="rollButton" class="roll">Roll 4-Sided Dice</button><p id="result" class="result">Ready to roll!</p>
-<section class="stats"><div class="stat"><span>You</span><strong id="youWins">0</strong></div><div class="stat"><span>House</span><strong id="houseWins">0</strong></div><div class="stat"><span>Rounds</span><strong id="rounds">0</strong></div></section>
-<section class="card wheel-section" style="margin-top:26px"><h2>🎡 Spin the Wheel</h2><p>Give the wheel a spin!</p><div id="wheel" style="position:relative;width:min(260px,70vw);aspect-ratio:1;margin:18px auto;border-radius:50%;border:8px solid var(--surface2);background:conic-gradient(#151923 0deg 45deg,#fff 45deg 90deg,#151923 90deg 135deg,#fff 135deg 180deg,#151923 180deg 225deg,#fff 225deg 270deg,#151923 270deg 315deg,#fff 315deg 360deg);transition:transform 2.5s cubic-bezier(.12,.8,.18,1);box-shadow:0 8px 24px #0003"><span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;text-shadow:0 1px 3px #000;transform:rotate(22.5deg) translateY(-76px)">YOU</span><span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#151923;transform:rotate(67.5deg) translateY(-76px)">HOUSE</span><span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;text-shadow:0 1px 3px #000;transform:rotate(112.5deg) translateY(-76px)">YOU</span><span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#151923;transform:rotate(157.5deg) translateY(-76px)">HOUSE</span><span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;text-shadow:0 1px 3px #000;transform:rotate(202.5deg) translateY(-76px)">YOU</span><span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#151923;transform:rotate(247.5deg) translateY(-76px)">HOUSE</span><span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;text-shadow:0 1px 3px #000;transform:rotate(292.5deg) translateY(-76px)">YOU</span><span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#151923;transform:rotate(337.5deg) translateY(-76px)">HOUSE</span></div><button id="spinButton" type="button" class="roll wheel-button">Spin Wheel</button><p id="wheelResult" class="result">Ready to spin!</p><section class="wheel-stats"><div class="wheel-stat"><span>You</span><strong id="wheelYouWins">0</strong></div><div class="wheel-stat"><span>House</span><strong id="wheelHouseWins">0</strong></div><div class="wheel-stat"><span>Spins</span><strong id="wheelSpins">0</strong></div></section></section>
-</main></div>
+
+<body>
+<div id="app">
+<main class="game">
+
+<div class="eyebrow">🎲 DICE GAME</div>
+<h1>You vs. House</h1>
+
+<header>
+<p>Roll two 4-sided dice. Higher number wins. No ties.</p>
+</header>
+
+<nav class="tabs" aria-label="Game sections">
+<button class="tab active" data-target="diceSection">🎲 Dice</button>
+<button class="tab" data-target="wheelSection">🎡 Wheel</button>
+<button class="tab" data-target="stopwatchSection">⏱️ Stopwatch</button>
+</nav>
+
+<section id="diceSection" class="game-section">
+
+<section class="dice-grid">
+
+<article class="card">
+<h2>You</h2>
+<div id="youDie" class="die" data-value="?"></div>
+</article>
+
+<article class="card">
+<h2>House 🏠</h2>
+<div id="houseDie" class="die" data-value="?"></div>
+</article>
+
+</section>
+
+<button id="rollButton" class="roll">Roll 4-Sided Dice</button>
+
+<p id="result" class="result">Ready to roll!</p>
+
+<section class="stats">
+<div class="stat">
+<span>You</span>
+<strong id="youWins">0</strong>
+</div>
+
+<div class="stat">
+<span>House</span>
+<strong id="houseWins">0</strong>
+</div>
+
+<div class="stat">
+<span>Rounds</span>
+<strong id="rounds">0</strong>
+</div>
+</section>
+
+</section>
+
+<section id="wheelSection" class="game-section card wheel-section" style="margin-top:26px">
+
+<h2>🎡 Spin the Wheel</h2>
+<p>Give the wheel a spin!</p>
+
+<div class="wheel-wrap">
+
+<div class="wheel-pointer" aria-hidden="true"></div>
+
+<div id="wheel" style="position:relative;width:100%;aspect-ratio:1;margin:0;border-radius:50%;border:8px solid var(--surface2);background:conic-gradient(#151923 0deg 45deg,#fff 45deg 90deg,#151923 90deg 135deg,#fff 135deg 180deg,#151923 180deg 225deg,#fff 225deg 270deg,#151923 270deg 315deg,#fff 315deg 360deg);transition:transform 2.5s cubic-bezier(.12,.8,.18,1);box-shadow:0 8px 24px #0003">
+
+<span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;text-shadow:0 1px 3px #000;transform:rotate(22.5deg) translateY(-76px)">YOU</span>
+
+<span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#151923;transform:rotate(67.5deg) translateY(-76px)">HOUSE</span>
+
+<span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;text-shadow:0 1px 3px #000;transform:rotate(112.5deg) translateY(-76px)">YOU</span>
+
+<span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#151923;transform:rotate(157.5deg) translateY(-76px)">HOUSE</span>
+
+<span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;text-shadow:0 1px 3px #000;transform:rotate(202.5deg) translateY(-76px)">YOU</span>
+
+<span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#151923;transform:rotate(247.5deg) translateY(-76px)">HOUSE</span>
+
+<span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;text-shadow:0 1px 3px #000;transform:rotate(292.5deg) translateY(-76px)">YOU</span>
+
+<span style="position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:14px;color:#151923;transform:rotate(337.5deg) translateY(-76px)">HOUSE</span>
+
+</div>
+</div>
+
+<button id="spinButton" type="button" class="roll wheel-button">Spin Wheel</button>
+
+<p id="wheelResult" class="result">Ready to spin!</p>
+
+<section class="wheel-stats">
+
+<div class="wheel-stat">
+<span>You</span>
+<strong id="wheelYouWins">0</strong>
+</div>
+
+<div class="wheel-stat">
+<span>House</span>
+<strong id="wheelHouseWins">0</strong>
+</div>
+
+<div class="wheel-stat">
+<span>Spins</span>
+<strong id="wheelSpins">0</strong>
+</div>
+
+</section>
+</section>
+
+<section id="stopwatchSection" class="game-section card stopwatch-section">
+
+<h2>⏱️ Closest to 1 Second</h2>
+
+<p>Stop the timer as close to 1.00 second as you can!</p>
+
+<div id="stopwatchDisplay" class="stopwatch-display">00:00.00</div>
+
+<div class="stopwatch-buttons">
+
+<button id="startStopwatch" type="button" class="roll stopwatch-button">Start</button>
+
+<button id="pauseStopwatch" type="button" class="roll stopwatch-button">Pause</button>
+
+<button id="resetStopwatch" type="button" class="roll stopwatch-button">Reset</button>
+
+</div>
+
+<p id="stopwatchResult" class="result">Ready!</p>
+
+</section>
+
+</main>
+</div>
+
 <script>
-const youDie=document.getElementById('youDie'),houseDie=document.getElementById('houseDie'),button=document.getElementById('rollButton'),result=document.getElementById('result'),youWinsEl=document.getElementById('youWins'),houseWinsEl=document.getElementById('houseWins'),roundsEl=document.getElementById('rounds');let youWins=0,houseWins=0,rounds=0;
-function d4(){return Math.floor(Math.random()*4)+1}
-function round(){if(button.disabled)return;button.disabled=true;youDie.classList.add('rolling');houseDie.classList.add('rolling');result.textContent='Rolling...';setTimeout(()=>{const house=Math.random()<.60;let winner,loser;if(house){winner=d4();if(winner===1)winner=2;loser=Math.floor(Math.random()*(winner-1))+1;houseDie.dataset.value=winner;youDie.dataset.value=loser;houseWins++;result.textContent='House wins! 🏠'}else{winner=d4();if(winner===1)winner=2;loser=Math.floor(Math.random()*(winner-1))+1;youDie.dataset.value=winner;houseDie.dataset.value=loser;youWins++;result.textContent='You win! 🎉'}youDie.classList.remove('rolling');houseDie.classList.remove('rolling');rounds++;youWinsEl.textContent=youWins;houseWinsEl.textContent=houseWins;roundsEl.textContent=rounds;button.disabled=false},650)}
+
+const youDie=document.getElementById('youDie'),
+houseDie=document.getElementById('houseDie'),
+button=document.getElementById('rollButton'),
+result=document.getElementById('result'),
+youWinsEl=document.getElementById('youWins'),
+houseWinsEl=document.getElementById('houseWins'),
+roundsEl=document.getElementById('rounds');
+
+let youWins=0,houseWins=0,rounds=0;
+
+function d4(){
+return Math.floor(Math.random()*4)+1
+}
+
+function round(){
+
+if(button.disabled)return;
+
+button.disabled=true;
+
+youDie.classList.add('rolling');
+houseDie.classList.add('rolling');
+
+result.textContent='Rolling...';
+
+setTimeout(()=>{
+
+const house=Math.random()<.60;
+
+let winner,loser;
+
+if(house){
+
+winner=d4();
+
+if(winner===1)winner=2;
+
+loser=Math.floor(Math.random()*(winner-1))+1;
+
+houseDie.dataset.value=winner;
+youDie.dataset.value=loser;
+
+houseWins++;
+
+result.textContent='House wins! 🏠';
+
+}else{
+
+winner=d4();
+
+if(winner===1)winner=2;
+
+loser=Math.floor(Math.random()*(winner-1))+1;
+
+youDie.dataset.value=winner;
+houseDie.dataset.value=loser;
+
+youWins++;
+
+result.textContent='You win! 🎉';
+
+}
+
+youDie.classList.remove('rolling');
+houseDie.classList.remove('rolling');
+
+rounds++;
+
+youWinsEl.textContent=youWins;
+houseWinsEl.textContent=houseWins;
+roundsEl.textContent=rounds;
+
+button.disabled=false;
+
+},650)
+
+}
+
 button.addEventListener('click',round);
-const wheel=document.getElementById('wheel'),spinButton=document.getElementById('spinButton'),wheelResult=document.getElementById('wheelResult'),wheelYouWinsEl=document.getElementById('wheelYouWins'),wheelHouseWinsEl=document.getElementById('wheelHouseWins'),wheelSpinsEl=document.getElementById('wheelSpins');let wheelYouWins=0,wheelHouseWins=0,wheelSpins=0;spinButton.addEventListener('click',()=>{if(spinButton.disabled)return;spinButton.disabled=true;wheelResult.textContent='Spinning...';wheel.classList.remove('spinning');void wheel.offsetWidth;wheel.classList.add('spinning');setTimeout(()=>{wheel.classList.remove('spinning');const house=Math.random()<.6;if(house){wheelHouseWins++;wheelResult.textContent='House! 🏠'}else{wheelYouWins++;wheelResult.textContent='You! 🎉'}wheelSpins++;wheelYouWinsEl.textContent=wheelYouWins;wheelHouseWinsEl.textContent=wheelHouseWins;wheelSpinsEl.textContent=wheelSpins;spinButton.disabled=false},2500)});
-</script></body></html>
+
+
+const gameSections=document.querySelectorAll('.game-section');
+
+document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{
+
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+
+tab.classList.add('active');
+
+gameSections.forEach(section=>
+section.style.display=section.id===tab.dataset.target?'block':'none'
+);
+
+}));
+
+gameSections.forEach(section=>
+section.style.display=section.id==='diceSection'?'block':'none'
+);
+
+document.querySelector('.tab[data-target="diceSection"]').classList.add('active');
+
+
+const wheel=document.getElementById('wheel'),
+spinButton=document.getElementById('spinButton'),
+wheelResult=document.getElementById('wheelResult'),
+wheelYouWinsEl=document.getElementById('wheelYouWins'),
+wheelHouseWinsEl=document.getElementById('wheelHouseWins'),
+wheelSpinsEl=document.getElementById('wheelSpins');
+
+let wheelYouWins=0,
+wheelHouseWins=0,
+wheelSpins=0;
+
+spinButton.addEventListener('click',()=>{
+
+if(spinButton.disabled)return;
+
+spinButton.disabled=true;
+
+wheelResult.textContent='Spinning...';
+
+wheel.classList.remove('spinning');
+
+void wheel.offsetWidth;
+
+wheel.classList.add('spinning');
+
+setTimeout(()=>{
+
+wheel.classList.remove('spinning');
+
+const house=Math.random()<.6;
+
+if(house){
+
+wheelHouseWins++;
+
+wheelResult.textContent='House! 🏠';
+
+}else{
+
+wheelYouWins++;
+
+wheelResult.textContent='You! 🎉';
+
+}
+
+wheelSpins++;
+
+wheelYouWinsEl.textContent=wheelYouWins;
+wheelHouseWinsEl.textContent=wheelHouseWins;
+wheelSpinsEl.textContent=wheelSpins;
+
+spinButton.disabled=false;
+
+},2500)
+
+});
+
+
+const stopwatchDisplay=document.getElementById('stopwatchDisplay'),
+startStopwatch=document.getElementById('startStopwatch'),
+pauseStopwatch=document.getElementById('pauseStopwatch'),
+resetStopwatch=document.getElementById('resetStopwatch'),
+stopwatchResult=document.getElementById('stopwatchResult');
+
+let stopwatchStart=0,
+stopwatchElapsed=0,
+stopwatchTimer=null;
+
+function formatStopwatch(ms){
+
+const total=Math.floor(ms/10);
+
+const minutes=Math.floor(total/6000);
+
+const seconds=Math.floor(total/100)%60;
+
+const centiseconds=total%100;
+
+return String(minutes).padStart(2,'0')+
+':'+String(seconds).padStart(2,'0')+
+'.'+String(centiseconds).padStart(2,'0')
+
+}
+
+function updateStopwatch(){
+
+stopwatchElapsed=Date.now()-stopwatchStart;
+
+stopwatchDisplay.textContent=formatStopwatch(stopwatchElapsed)
+
+}
+
+function finishStopwatch(){
+
+if(!stopwatchTimer)return;
+
+clearInterval(stopwatchTimer);
+
+stopwatchTimer=null;
+
+updateStopwatch();
+
+const playerTime=Math.round(stopwatchElapsed/10)/100;
+
+let houseTime=Math.round((0.90+Math.random()*0.21)*100)/100;
+
+const playerDistance=Math.abs(playerTime-1);
+
+let houseDistance=Math.abs(houseTime-1);
+
+const outcome=Math.random();
+
+if(outcome>=0.90){
+
+houseTime=playerTime;
+
+houseDistance=playerDistance
+
+}else if(outcome<0.55&&houseDistance>=playerDistance){
+
+const direction=houseTime<1?-1:1;
+
+const closerDistance=Math.max(0,playerDistance-0.01);
+
+houseTime=Math.round((1+direction*closerDistance)*100)/100;
+
+houseDistance=Math.abs(houseTime-1)
+
+}else if(outcome>=0.55&&houseDistance<=playerDistance){
+
+const direction=houseTime<1?-1:1;
+
+const fartherDistance=Math.min(0.10,playerDistance+0.01);
+
+houseTime=Math.round((1+direction*fartherDistance)*100)/100;
+
+houseDistance=Math.abs(houseTime-1)
+
+}
+
+stopwatchResult.textContent=
+
+houseDistance<playerDistance
+
+?'House wins! 🏠 You: '+playerTime.toFixed(2)+'s | House: '+houseTime.toFixed(2)+'s'
+
+:playerDistance<houseDistance
+
+?'You win! 🎉 You: '+playerTime.toFixed(2)+'s | House: '+houseTime.toFixed(2)+'s'
+
+:'Tie! You: '+playerTime.toFixed(2)+'s | House: '+houseTime.toFixed(2)+'s'
+
+}
+
+startStopwatch.addEventListener('click',()=>{
+
+if(stopwatchTimer)return;
+
+stopwatchResult.textContent='Stop as close to 1.00s as possible!';
+
+stopwatchStart=Date.now()-stopwatchElapsed;
+
+updateStopwatch();
+
+stopwatchTimer=setInterval(updateStopwatch,10)
+
+});
+
+pauseStopwatch.addEventListener('click',finishStopwatch);
+
+resetStopwatch.addEventListener('click',()=>{
+
+clearInterval(stopwatchTimer);
+
+stopwatchTimer=null;
+
+stopwatchElapsed=0;
+
+stopwatchDisplay.textContent='00:00.00';
+
+stopwatchResult.textContent='Ready!'
+
+});
+
+document.addEventListener('keydown',event=>{
+
+if(event.code==='Space'){
+
+event.preventDefault();
+
+if(stopwatchTimer){
+
+finishStopwatch()
+
+}else{
+
+startStopwatch.click()
+
+}
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
